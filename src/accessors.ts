@@ -22,6 +22,7 @@ type Param = {
   natspec?: string;
 };
 
+
 function getParams(params: ParameterList, natspec: NatSpec): Param[] {
   return params.parameters.map(p => ({
     name: p.name,
@@ -39,13 +40,6 @@ export const accessors = {
 
   natspec(item: DocItemWithContext): NatSpec {
     return parseNatspec(item);
-  },
-
-  devIsUnique(natspec: NatSpec | undefined): boolean {
-    if (natspec) {
-      return natspec.dev != natspec.notice;
-    }
-    return false;
   },
 
   name(item: DocItemWithContext): string {
