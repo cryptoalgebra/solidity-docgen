@@ -103,7 +103,7 @@ export function parseNatspec(item: DocItemWithContext): NatSpec {
     res.dev = res.dev.trim();
   }
   if (res.notice) {
-    res.dev = res.notice.trim();
+    res.notice = res.notice.trim();
   }
 
   if (inheritFrom) {

@@ -41,6 +41,13 @@ export const accessors = {
     return parseNatspec(item);
   },
 
+  devIsUnique(natspec: NatSpec | undefined): boolean {
+    if (natspec) {
+      return natspec.dev != natspec.notice;
+    }
+    return false;
+  },
+
   name(item: DocItemWithContext): string {
     if (item.nodeType === 'FunctionDefinition') {
       return item.kind === 'function' ? item.name : item.kind;
@@ -153,6 +160,45 @@ export const accessors = {
   variables(item: DocItemWithContext): VariableDeclaration[] | undefined {
     return (item.nodeType === 'ContractDefinition')
       ? item.nodes.filter(isNodeType('VariableDeclaration')).filter(v => v.stateVariable)
+      : undefined;
+  },
+
+  notTest(item: DocItemWithContext): boolean {
+    if (item.nodeType !== 'ContractDefinition') return true;
+    return !(
+      item.name.endsWith('Test')
+      || item.name.startsWith('Test')
+      || item.name.endsWith('Mock')
+      || item.name.startsWith('Mock')
+    )
+  },
+
+  hasPublicMembers(item: DocItemWithContext): boolean {
+    if (item.nodeType !== 'ContractDefinition') return false;
+
+    let variables = item.nodes.filter(isNodeType('VariableDeclaration')).filter(v => v.stateVariable).filter(v => v.visibility == 'public')
+
+    if (variables && variables.length > 0) return true;
+  
+    let events = [...findAll('EventDefinition', item)];
+    if (events && events.length > 0) return true;
+  
+    let functions = [...findAll('FunctionDefinition', item)]
+    .filter((x) => (x.visibility == 'public' || x.visibility == 'external'));
+
+    if (functions && functions.length > 0) return true;
+  
+    return false;
+  },
+  
+  publicExternalFunctions(item: DocItemWithContext): FunctionDefinition[] {
+    return [...findAll('FunctionDefinition', item)]
+    .filter((x) => (x.visibility == 'public' || x.visibility == 'external'));
+  },
+  
+  publicVariables(item: DocItemWithContext): VariableDeclaration[] | undefined {
+    return (item.nodeType === 'ContractDefinition')
+      ? item.nodes.filter(isNodeType('VariableDeclaration')).filter(v => v.stateVariable).filter(v => v.visibility == 'public')
       : undefined;
   },
 };
