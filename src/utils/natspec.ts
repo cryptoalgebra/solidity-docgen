@@ -86,16 +86,24 @@ export function parseNatspec(item: DocItemWithContext): NatSpec {
     }
 
     if (tag === 'inheritdoc') {
-      if (item.nodeType !== 'FunctionDefinition') {
+      if (item.nodeType !== 'FunctionDefinition' && item.nodeType !== 'VariableDeclaration') {
         throw new Error(`Expected function but saw ${accessors.type(item)}`);
       }
       const parentContractName = content.trim();
+
       const parentContract = getContractsInScope(item)[parentContractName];
       if (!parentContract) {
         throw new Error(`Parent contract '${parentContractName}' not found`);
       }
       inheritFrom = [...findAll('FunctionDefinition', parentContract)].find(f => f.name === item.name);
     }
+  }
+
+  if (res.dev) {
+    res.dev = res.dev.trim();
+  }
+  if (res.notice) {
+    res.dev = res.notice.trim();
   }
 
   if (inheritFrom) {
@@ -111,5 +119,5 @@ export function parseNatspec(item: DocItemWithContext): NatSpec {
 function cleanUpDocstring(text: string) {
   return text
     .replace(/\n\n?^[ \t]*(?:\*|\/\/\/)/mg, '\n\n')
-    .replace(/^[ \t]?/mg, '');
+    .replace(/^[ \t]+/mg, '');
 }

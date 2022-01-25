@@ -1,5 +1,7 @@
 import { TypeName } from "solidity-ast";
-import { DocItemWithContext } from "../../site";
+import { DocItemWithContext, } from "../../site";
+import { findAll, isNodeType } from 'solidity-ast/utils';
+import { ErrorDefinition, EventDefinition, FunctionDefinition, ModifierDefinition, ParameterList, VariableDeclaration } from 'solidity-ast';
 
 /**
  * Returns a Markdown heading marker. An optional `hlevel` context variable increases the heading level.
@@ -24,4 +26,14 @@ export function joinLines(text?: string) {
   if (typeof text === 'string') {
     return text.replace(/\n+/g, ' ');
   }
+}
+
+export function publicExternalFunctions(item: DocItemWithContext): FunctionDefinition[] | undefined {
+  return [...findAll('FunctionDefinition', item)].filter((x) => x.visibility == 'public' || x.visibility == 'external');
+}
+
+export function publicVariables(item: DocItemWithContext): VariableDeclaration[] | undefined {
+  return (item.nodeType === 'ContractDefinition')
+    ? item.nodes.filter(isNodeType('VariableDeclaration')).filter(v => v.stateVariable).filter(v => v.visibility == 'public')
+    : undefined;
 }

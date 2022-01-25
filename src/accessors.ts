@@ -49,6 +49,60 @@ export const accessors = {
     }
   },
 
+  visibility(item: DocItemWithContext): string | undefined {
+    if (item.nodeType === 'FunctionDefinition' || item.nodeType === 'VariableDeclaration') {
+      return item.visibility ? item.visibility : undefined;
+    } else {
+      return undefined;
+    }
+  },
+
+  typeName(item: DocItemWithContext): string | undefined {
+    if (item.nodeType === 'VariableDeclaration') {
+      if (item.typeName) {
+        if (item.typeName.nodeType == 'ElementaryTypeName') {
+          return item.typeName.name;
+        } else {
+          if (item.typeName.typeDescriptions && item.typeName.typeDescriptions.typeString) {
+            return item.typeName.typeDescriptions.typeString;
+          }
+        }
+      }
+    } else {
+      return undefined;
+    }
+  },
+
+  stateMutability(item: DocItemWithContext): string | undefined {
+    if (item.nodeType === 'FunctionDefinition') {
+      if (item.stateMutability == 'nonpayable') {
+        return undefined;
+      }
+      return item.stateMutability ? item.stateMutability : undefined;
+    } else if (item.nodeType === 'VariableDeclaration') {
+      if (item.mutability == 'mutable') {
+        return undefined;
+      }
+      return item.mutability ? item.mutability : undefined;
+    }
+  },
+
+  virtual(item: DocItemWithContext): string | undefined {
+    if (item.nodeType === 'FunctionDefinition') {
+      return item.virtual ? 'virtual' : undefined;
+    } else {
+      return undefined;
+    }
+  },
+
+  withModifiers(item: DocItemWithContext): string | undefined {
+    if (item.nodeType === 'FunctionDefinition') {
+      return item.modifiers ? item.modifiers.map((x) => x.modifierName.name).join(', ')  : undefined;
+    } else {
+      return undefined;
+    }
+  },
+
   signature(item: DocItemWithContext): string | undefined {
     switch (item.nodeType) {
       case 'ContractDefinition':
@@ -58,11 +112,16 @@ export const accessors = {
         const name = accessors.name(item);
         return `${name}(${item.parameters.parameters.map(a => a.typeName?.typeDescriptions.typeString!).join(',')})`;
       }
+
+      case 'EventDefinition': {
+        const name = accessors.name(item);
+        return `${name}(${item.parameters.parameters.map(a => a.typeName?.typeDescriptions.typeString!).join(',')})`;       
+      }
     }
   },
 
   params(item: DocItemWithContext): Param[] | undefined {
-    if (item.nodeType === 'FunctionDefinition') {
+    if (item.nodeType === 'FunctionDefinition' || item.nodeType === 'EventDefinition') {
       const natspec = accessors.natspec(item);
       return getParams(item.parameters, natspec);
     }

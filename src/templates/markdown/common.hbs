@@ -1,4 +1,8 @@
-{{h}} {{name}}
+{{h}} {{name}} {{stateMutability}} {{visibility}}
+
+{{#if withModifiers}}
+{{withModifiers}}
+{{/if}}
 
 {{#if signature}}
 `{{signature}}`
@@ -7,7 +11,7 @@
 {{natspec.notice}}
 
 {{#if natspec.dev}}
-Developer note: {{natspec.dev}}
+*Developer note: {{natspec.dev}}*
 {{/if}}
 
 
@@ -20,6 +24,7 @@ Developer note: {{natspec.dev}}
 {{/if}}
 
 {{#if returns}}
+**Returns:**
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 {{#each returns}}
